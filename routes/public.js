@@ -9,7 +9,7 @@ const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
 
 
-//cadastro
+//cadastro aluno
 router.post('/cadastro', async (req, res) => {
 
     try{
@@ -18,7 +18,7 @@ router.post('/cadastro', async (req, res) => {
     const salt = await bcrypt.genSalt(10)
     const hashPassword = await bcrypt.hash(user.password, salt)
 
-    const userDB = await prisma.user.create({
+    const userDB = await prisma.aluno.create({
         data:{
             email: user.email,
             name: user.name,
@@ -31,6 +31,30 @@ router.post('/cadastro', async (req, res) => {
         res.status(500).json({message:"Server Error"})
     }
 });
+
+//cadastro tutor
+router.post('/cadastro', async (req, res) => {
+
+    try{
+    const user = req.body
+
+    const salt = await bcrypt.genSalt(10)
+    const hashPassword = await bcrypt.hash(user.password, salt)
+
+    const userDB = await prisma.tutor.create({
+        data:{
+            email: user.email,
+            name: user.name,
+            password: hashPassword,
+        },
+    })
+    res.status(201).json(userDB)
+    }
+    catch(err) {
+        res.status(500).json({message:"Server Error"})
+    }
+});
+
 
 //login
 
