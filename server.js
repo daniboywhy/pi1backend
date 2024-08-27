@@ -18,4 +18,4 @@ app.listen(3000, () => console.log("Server UP^^"));
 
 //daniboywhy
 //UXhivTxhTcCu1xlU
-//mongodb+srv://daniboywhy:UXhivTxhTcCu1xlU@dbp1.puvmz.mongodb.net/?retryWrites=true&w=majority&appName=dbp1
+//mongodb+srv://daniboywhy:UXhivTxhTcCu1xlU@dbp1.puvmz.mongodb.net/dbp1?retryWrites=true&w=majority&appName=dbp1
