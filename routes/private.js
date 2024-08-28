@@ -14,4 +14,6 @@ router.get('/listar-usuarios', async (req, res) => {
     }
 })
 
+
+
 export default router;
