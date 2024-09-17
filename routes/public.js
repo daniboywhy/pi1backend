@@ -98,7 +98,8 @@ router.post('/tutor', async (req, res) => {
             senha: req.body.senha,
             email: req.body.email,
             nome: req.body.nome,
-            cpf: req.body.cpf
+            cpf: req.body.cpf,
+            disciplinas: req.body.disciplinas
         }
     });
 
@@ -117,7 +118,8 @@ router.put('/tutor/:id', async (req, res) => {
         },
         data: {
             nome: req.body.nome,
-            cpf: req.body.cpf
+            cpf: req.body.cpf,
+            disciplinas: req.body.disciplinas
         }  
     });
     res.status(200).json(req.body);
@@ -126,7 +128,8 @@ router.put('/tutor/:id', async (req, res) => {
 router.delete('/tutor/:id', async (req, res) => {
     await prisma.tutor.delete({
         where: {
-            id: req.params.id
+            id: req.params.id,
+            disciplinas: req.params.disciplinas
         }
     });
 
@@ -145,6 +148,7 @@ router.post('/aluno', async (req, res) => {
             usuario: req.body.usuario,
             senha: req.body.senha,
             email: req.body.email,
+            tutores: req.body.tutores,
             nome: req.body.nome,
             cpf: req.body.cpf
         }
@@ -165,7 +169,8 @@ router.put('/aluno/:id', async (req, res) => {
         },
         data: {
             nome: req.body.nome,
-            cpf: req.body.cpf
+            cpf: req.body.cpf,
+            tutores: req.body.tutores
         }  
     });
     res.status(200).json(req.body);
@@ -174,11 +179,154 @@ router.put('/aluno/:id', async (req, res) => {
 router.delete('/aluno/:id', async (req, res) => {
     await prisma.aluno.delete({
         where: {
-            id: req.params.id
+            id: req.params.id,
+            tutores: req.params.tutores
         }
     });
 
     res.status(200).json({ message: 'Usuário deletado' });
 });
+
+// Criar uma nova disciplina
+router.post('/disciplina', async (req, res) => {
+  try {
+      const { nome, descricao } = req.body;
+
+      const disciplina = await prisma.disciplina.create({
+          data: {
+              nome,
+              descricao,
+          },
+      });
+
+      res.status(201).json(disciplina);
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Erro no servidor' });
+  }
+});
+
+// Listar todas as disciplinas
+router.get('/disciplina', async (req, res) => {
+  try {
+      const disciplinas = await prisma.disciplina.findMany();
+      res.status(200).json(disciplinas);
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Erro no servidor' });
+  }
+});
+
+// Atualizar uma disciplina
+router.put('/disciplina/:id', async (req, res) => {
+  try {
+      const { nome, descricao } = req.body;
+
+      const disciplina = await prisma.disciplina.update({
+          where: { id: req.params.id },
+          data: {
+              nome,
+              descricao,
+          },
+      });
+
+      res.status(200).json(disciplina);
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Erro no servidor' });
+  }
+});
+
+// Deletar uma disciplina
+router.delete('/disciplina/:id', async (req, res) => {
+  try {
+      await prisma.disciplina.delete({
+          where: { id: req.params.id },
+      });
+
+      res.status(200).json({ message: 'Disciplina deletada com sucesso' });
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Erro no servidor' });
+  }
+});
+// Criar uma nova turma (vincula tutor, aluno e disciplina)
+router.post('/turma', async (req, res) => {
+  try {
+      const { tutorId, alunoId, disciplinaId, ano, semestre } = req.body;
+
+      const turma = await prisma.turma.create({
+          data: {
+              tutorId,
+              alunoId,
+              disciplinaId,
+              ano,
+              semestre,
+          },
+      });
+
+      res.status(201).json(turma);
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Erro no servidor' });
+  }
+});
+
+// Listar todas as turmas
+router.get('/turma', async (req, res) => {
+  try {
+      const turmas = await prisma.turma.findMany({
+          include: {
+              tutor: true,
+              aluno: true,
+              disciplina: true,
+          },
+      });
+      res.status(200).json(turmas);
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Erro no servidor' });
+  }
+});
+
+// Atualizar uma turma
+router.put('/turma/:id', async (req, res) => {
+  try {
+      const { tutorId, alunoId, disciplinaId, ano, semestre } = req.body;
+
+      const turma = await prisma.turma.update({
+          where: { id: req.params.id },
+          data: {
+              tutorId,
+              alunoId,
+              disciplinaId,
+              ano,
+              semestre,
+          },
+      });
+
+      res.status(200).json(turma);
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Erro no servidor' });
+  }
+});
+
+// Deletar uma turma
+router.delete('/turma/:id', async (req, res) => {
+  try {
+      await prisma.turma.delete({
+          where: { id: req.params.id },
+      });
+
+      res.status(200).json({ message: 'Turma deletada com sucesso' });
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Erro no servidor' });
+  }
+});
+
+
+
 
 export default router;
