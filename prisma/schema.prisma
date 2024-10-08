@@ -15,7 +15,7 @@ datasource db {
 
 model Tutor {
   id          String          @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
+  nome        String
   cpf         String          @unique
   email       String          @unique
   usuario     String          @unique
@@ -25,7 +25,7 @@ model Tutor {
 
 model Aluno {
   id          String          @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
+  nome        String
   cpf         String          @unique
   email       String          @unique
   usuario     String          @unique
