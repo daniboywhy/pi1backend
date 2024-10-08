@@ -13,9 +13,14 @@ const JWT_SECRET = process.env.JWT_SECRET;
 router.post('/cadastro', async (req, res) => {
     try {
       const { email, cpf, nome, usuario, senha, tipoUsuario } = req.body;
+
+      //console.log(req.body);
   
-      const salt = await bcrypt.genSalt(10);
-      const hashPassword = await bcrypt.hash(senha, salt);
+      //const salt = await bcrypt.genSalt(10);
+
+      //console.log('Salt gerado:', salt);
+
+      //const hashPassword =  await bcrypt.hash(senha, salt);
   
       let userDB;
   
@@ -26,7 +31,7 @@ router.post('/cadastro', async (req, res) => {
             cpf,
             nome,
             usuario,
-            senha: hashPassword,
+            senha
           },
         });
       } else if (tipoUsuario === 'tutor') {
@@ -36,7 +41,7 @@ router.post('/cadastro', async (req, res) => {
             cpf,
             nome,
             usuario,
-            senha: hashPassword,
+            senha
           },
         });
       } else {
@@ -76,7 +81,7 @@ router.post('/login', async (req, res) => {
         return res.status(404).json({message: "Invalid Credentials"})
     }
 
-    const isMatch = await bcrypt.compare(senha, user.senha)
+    const isMatch = compare(senha, user.senha)
 
     if(!isMatch){
         return res.status(400).json({message: "Invalid Password"})
