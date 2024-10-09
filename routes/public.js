@@ -1,6 +1,6 @@
 import express from "express"; 
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
+// import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
@@ -81,18 +81,19 @@ router.post('/login', async (req, res) => {
         return res.status(404).json({message: "Invalid Credentials"})
     }
 
-    const isMatch = compare(senha, user.senha)
+    //const isMatch = compare(senha, user.senha)
 
-    if(!isMatch){
-        return res.status(400).json({message: "Invalid Password"})
-    }
+    //if(!isMatch){
+    //    return res.status(400).json({message: "Invalid Password"})
+    //}
 
     const token = jwt.sign(
         {
             id: user.id,
             nome: user.name,
             email: user.email,
-            cpf: user.cpf
+            cpf: user.cpf,
+            tipoUsuario
         },
          JWT_SECRET, { expiresIn: '1d'})
 

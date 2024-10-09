@@ -36,6 +36,36 @@ router.get('/api/user/me', auth, async (req, res) => {
   });
   
 
-
+  router.put('/api/user/update', auth, async (req, res) => {
+    try {
+      const userId = req.user.id; // O ID do usuário obtido do middleware de autenticação
+      const { nome, email, cpf } = req.body; // Dados que o usuário deseja atualizar
+  
+      // Verifica se o usuário existe no banco de dados
+      const user = await prisma.Aluno.findUnique({
+        where: { id: userId }
+      });
+  
+      if (!user) {
+        return res.status(404).json({ message: 'Usuário não encontrado' });
+      }
+  
+      // Atualiza as informações do usuário
+      const updatedUser = await prisma.Aluno.update({
+        where: { id: userId },
+        data: {
+          nome,
+          email,
+          cpf
+        }
+      });
+  
+      // Retorna o usuário atualizado como resposta
+      res.json(updatedUser);
+    } catch (error) {
+      console.error('Erro ao atualizar usuário:', error);
+      res.status(500).json({ message: 'Erro ao atualizar informações do usuário' });
+    }
+  });
 
 export default router;
