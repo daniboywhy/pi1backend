@@ -8,9 +8,9 @@ const prisma = new PrismaClient();
 // Rota para obter as informações do usuário
 router.get('/api/user/me', auth, async (req, res) => {
   try {
-    const userId = req.user.id; // ID do usuário obtido do token JWT
-    const tipoUsuario = req.user.tipoUsuario; // Tipo de usuário obtido do token
-
+    const userId = req.user.id; // ID do usuário obtido do token
+    const tipoUsuario = req.user.tipoUsuario; // Tipo de usuário
+    
     let user;
 
     // Verifica o tipo de usuário e busca na tabela correspondente
@@ -31,7 +31,10 @@ router.get('/api/user/me', auth, async (req, res) => {
       return res.status(404).json({ message: 'Usuário não encontrado' });
     }
 
-    res.json(user); // Retorna as informações do usuário
+    // Adiciona o tipo de usuário ao objeto user antes de retornar
+    user.tipoUsuario = tipoUsuario;
+
+    res.json(user); // Retorna as informações do usuário, incluindo o tipo
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Erro ao buscar informações do usuário' });
