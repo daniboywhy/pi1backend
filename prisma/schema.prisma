@@ -51,5 +51,4 @@ model Turma {
   tutor        Tutor          @relation(fields: [tutorId], references: [id])
   aluno        Aluno          @relation(fields: [alunoId], references: [id])
   disciplina   Disciplina     @relation(fields: [disciplinaId], references: [id])
-
 }

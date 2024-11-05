@@ -306,13 +306,13 @@ router.delete('/disciplina/:id', async (req, res) => {
 // Criar uma nova turma (vincula tutor, aluno e disciplina)
 router.post('/turma', async (req, res) => {
   try {
-      const { tutorId, alunoId, disciplinaId, ano, semestre } = req.body;
+      const { tutorId, alunoId, disciplina} = req.body;
 
       const turma = await prisma.turma.create({
           data: {
               tutorId,
               alunoId,
-              disciplinaId,
+              disciplina
           },
       });
 
@@ -327,7 +327,7 @@ router.post('/turma', async (req, res) => {
 router.get('/turma', async (req, res) => {
   try {
       const turmas = await prisma.turma.findMany({
-          include: {
+          select: {
               tutor: true,
               aluno: true,
               disciplina: true,
@@ -343,14 +343,14 @@ router.get('/turma', async (req, res) => {
 // Atualizar uma turma
 router.put('/turma/:id', async (req, res) => {
   try {
-      const { tutorId, alunoId, disciplinaId, ano, semestre } = req.body;
+      const { tutorId, alunoId, disciplina} = req.body;
 
       const turma = await prisma.turma.update({
           where: { id: req.params.id },
           data: {
               tutorId,
               alunoId,
-              disciplinaId,
+              disciplina,
           },
       });
 
