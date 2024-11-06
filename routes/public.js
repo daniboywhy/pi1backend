@@ -311,22 +311,34 @@ router.delete('/disciplina/:id', async (req, res) => {
 // Criar uma nova turma (vincula tutor, aluno e disciplina)
 router.post('/turma', async (req, res) => {
   try {
-      const { tutorId, alunoId, disciplinaId} = req.body;
+    const { tutorId, alunoId, disciplinaId } = req.body;
 
-      const turma = await prisma.turma.create({
-          data: {
-              tutorId,
-              alunoId,
-              disciplinaId
-          },
-      });
+    // Certifique-se de que todos os IDs foram recebidos corretamente
+    if (!tutorId || !alunoId || !disciplinaId) {
+      return res.status(400).json({ message: "IDs de tutor, aluno e disciplina são obrigatórios." });
+    }
 
-      res.status(201).json(turma);
+    const turma = await prisma.turma.create({
+      data: {
+        tutor: {
+          connect: { id: tutorId },
+        },
+        aluno: {
+          connect: { id: alunoId },
+        },
+        disciplina: {
+          connect: { id: disciplinaId },
+        },
+      },
+    });
+
+    res.status(201).json(turma);
   } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: 'Erro no servidor' });
+    console.error("Erro ao criar turma:", err);
+    res.status(500).json({ message: "Erro no servidor" });
   }
 });
+
 
 // Listar todas as turmas
 router.get('/turma', async (req, res) => {
