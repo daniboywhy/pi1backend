@@ -243,12 +243,17 @@ router.delete('/aluno/:id', async (req, res) => {
 // Criar uma nova disciplina
 router.post('/disciplina', async (req, res) => {
   try {
-      const { nome, descricao } = req.body;
+      const { nome, descricao, tutorId } = req.body;
+
+      console.log("Dados recebidos:", { nome, descricao, tutorId });
 
       const disciplina = await prisma.disciplina.create({
           data: {
               nome,
               descricao,
+              tutores: {
+                connect: {id: tutorId},
+              },
           },
       });
 
@@ -306,13 +311,13 @@ router.delete('/disciplina/:id', async (req, res) => {
 // Criar uma nova turma (vincula tutor, aluno e disciplina)
 router.post('/turma', async (req, res) => {
   try {
-      const { tutorId, alunoId, disciplina} = req.body;
+      const { tutorId, alunoId, disciplinaId} = req.body;
 
       const turma = await prisma.turma.create({
           data: {
               tutorId,
               alunoId,
-              disciplina
+              disciplinaId
           },
       });
 
@@ -327,11 +332,17 @@ router.post('/turma', async (req, res) => {
 router.get('/turma', async (req, res) => {
   try {
       const turmas = await prisma.turma.findMany({
-          select: {
-              tutor: true,
-              aluno: true,
-              disciplina: true,
+        include: {
+          aluno: {
+            select: { nome: true } // Incluir apenas o nome do aluno
           },
+          tutor: {
+            select: { nome: true } // Incluir apenas o nome do professor
+          },
+          disciplina: {
+            select: { nome: true } // Incluir apenas o nome da disciplina
+          }
+        }
       });
       res.status(200).json(turmas);
   } catch (err) {
@@ -375,6 +386,23 @@ router.delete('/turma/:id', async (req, res) => {
   }
 });
 
+router.get("/tutordisciplinas", async (req, res) => {
+  try {
+    const tutordisciplinas = await prisma.tutor.findMany({
+      include: {
+        disciplinas: {
+          select: {
+            nome: true // Seleciona apenas o nome da disciplina
+          }
+        }
+      }
+    });
+    res.status(200).json(tutordisciplinas);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erro ao buscar disciplinas dos tutores" });
+  }
+});
 
 
 

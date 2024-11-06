@@ -20,8 +20,9 @@ model Tutor {
   email       String      @unique
   usuario     String      @unique
   senha       String
+  disciplinaIDs String[]   @db.ObjectId // Lista de IDs das disciplinas
+  disciplinas   Disciplina[] @relation(fields: [disciplinaIDs], references: [id])
   turmas      Turma[]     // Relacionamento com Turma
-  disciplinas String[]    // Lista de disciplinas como array de strings
 }
 
 
@@ -39,6 +40,8 @@ model Disciplina {
   id          String          @id @default(auto()) @map("_id") @db.ObjectId
   nome        String
   descricao   String
+  tutorIDs  String[]   @db.ObjectId // Lista de IDs dos professores
+  tutores   Tutor[] @relation(fields: [tutorIDs], references: [id])
   turmas      Turma[]         // Relacionamento com Turma
 }
 
@@ -51,4 +54,6 @@ model Turma {
   tutor        Tutor          @relation(fields: [tutorId], references: [id])
   aluno        Aluno          @relation(fields: [alunoId], references: [id])
   disciplina   Disciplina     @relation(fields: [disciplinaId], references: [id])
+
+  @@unique([alunoId, tutorId, disciplinaId])
 }
