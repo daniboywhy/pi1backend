@@ -416,6 +416,31 @@ router.get("/tutordisciplinas", async (req, res) => {
   }
 });
 
+router.get('/aluno/:alunoId/minhas-disciplinas', async (req, res) => {
+  const { alunoId } = req.params;
+
+  try {
+    const turmas = await prisma.turma.findMany({
+      where: { alunoId },
+      include: {
+        disciplina: true, // Inclui as informações da disciplina
+      },
+    });
+
+    // Mapeia as turmas para retornar tanto o turmaId quanto os detalhes da disciplina
+    const disciplinas = turmas.map(turma => ({
+      turmaId: turma.id, // Inclui o ID da turma
+      ...turma.disciplina // Inclui os detalhes da disciplina (nome, descrição, etc.)
+    }));
+
+    res.status(200).json(disciplinas);
+  } catch (error) {
+    console.error('Erro ao buscar disciplinas do aluno:', error);
+    res.status(500).json({ message: 'Erro ao buscar disciplinas do aluno' });
+  }
+});
+
+
 
 
 export default router;
