@@ -112,7 +112,8 @@ router.post('/tutor', async (req, res) => {
             email: req.body.email,
             nome: req.body.nome,
             cpf: req.body.cpf,
-            disciplinas: req.body.disciplinas
+            disciplinas: req.body.disciplinas,
+            dataAula: req.body.dataAula
         }
     });
 
