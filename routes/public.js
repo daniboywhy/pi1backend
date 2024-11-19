@@ -441,6 +441,30 @@ router.get('/aluno/:alunoId/minhas-disciplinas', async (req, res) => {
   }
 });
 
+// Listar disciplinas associadas a um tutor específico
+router.get('/tutor/:tutorId/disciplinas', async (req, res) => {
+  const { tutorId } = req.params;
+
+  try {
+    // Busca o tutor com suas disciplinas relacionadas
+    const tutor = await prisma.tutor.findUnique({
+      where: { id: tutorId },
+      include: {
+        disciplinas: true, // Inclui as disciplinas relacionadas ao tutor
+      },
+    });
+
+    // Verifica se o tutor foi encontrado
+    if (!tutor) {
+      return res.status(404).json({ message: 'Tutor não encontrado' });
+    }
+
+    res.status(200).json(tutor.disciplinas); // Retorna as disciplinas do tutor
+  } catch (error) {
+    console.error('Erro ao buscar disciplinas do tutor:', error);
+    res.status(500).json({ message: 'Erro no servidor ao buscar disciplinas do tutor' });
+  }
+});
 
 
 
