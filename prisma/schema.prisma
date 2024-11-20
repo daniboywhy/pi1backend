@@ -50,7 +50,8 @@ model Turma {
   tutorId      String         @db.ObjectId
   alunoId      String         @db.ObjectId
   disciplinaId String         @db.ObjectId
-  dataAula     DateTime
+  dataAula     DateTime?
+  avaliacao    Int
 
   tutor        Tutor          @relation(fields: [tutorId], references: [id])
   aluno        Aluno          @relation(fields: [alunoId], references: [id])
