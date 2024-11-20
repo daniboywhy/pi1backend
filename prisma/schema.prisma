@@ -52,7 +52,7 @@ model Turma {
   disciplinaId String         @db.ObjectId
   dataAula     DateTime?
   aprovado     Boolean        @default(false)
-  avaliacao    Int
+  avaliacao    Int?
 
   tutor        Tutor          @relation(fields: [tutorId], references: [id])
   aluno        Aluno          @relation(fields: [alunoId], references: [id])
