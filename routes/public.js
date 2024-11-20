@@ -466,6 +466,47 @@ router.get('/tutor/:tutorId/disciplinas', async (req, res) => {
   }
 });
 
+// Listar turmas pendentes de aprovação
+router.get('/tutor/:tutorId/turmas-pendentes', async (req, res) => {
+  const { tutorId } = req.params;
+  console.log("Tutor ID recebido:", tutorId);
+
+  try {
+    const turmasPendentes = await prisma.turma.findMany({
+      where: { tutorId: tutorId, aprovado: false },
+      include: {
+        aluno: true, // Inclui detalhes do aluno
+        disciplina: true, // Inclui detalhes da disciplina
+      },
+    });
+
+    res.status(200).json(turmasPendentes);
+  } catch (error) {
+    console.error("Erro ao buscar turmas pendentes:", error);
+    res.status(500).json({ message: "Erro ao buscar turmas pendentes." });
+  }
+});
+
+// Listar turmas aprovadas
+router.get('/tutor/:tutorId/turmas-aprovadas', async (req, res) => {
+  const { tutorId } = req.params;
+
+  try {
+    const turmasAprovadas = await prisma.turma.findMany({
+      where: { tutorId, aprovado: true },
+      include: {
+        aluno: true, // Inclui detalhes do aluno
+        disciplina: true, // Inclui detalhes da disciplina
+      },
+    });
+
+    res.status(200).json(turmasAprovadas);
+  } catch (error) {
+    console.error("Erro ao buscar turmas aprovadas:", error);
+    res.status(500).json({ message: "Erro ao buscar turmas aprovadas." });
+  }
+});
+
 
 
 export default router;
