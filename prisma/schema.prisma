@@ -50,7 +50,7 @@ model Turma {
   tutorId      String         @db.ObjectId
   alunoId      String         @db.ObjectId
   disciplinaId String         @db.ObjectId
-  dataAula     DateTime?
+  dataAula     String?
   aprovado     Boolean        @default(false)
   avaliacao    Int?
 

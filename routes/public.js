@@ -299,17 +299,40 @@ router.put('/disciplina/:id', async (req, res) => {
 
 // Deletar uma disciplina
 router.delete('/disciplina/:id', async (req, res) => {
-  try {
-      await prisma.disciplina.delete({
-          where: { id: req.params.id },
-      });
+  const { id } = req.params;
 
-      res.status(200).json({ message: 'Disciplina deletada com sucesso' });
-  } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: 'Erro no servidor' });
+  try {
+    // Localiza o tutor associado à disciplina
+    const tutor = await prisma.tutor.findFirst({
+      where: {
+        disciplinaIDs: { has: id }, // Verifica se o ID da disciplina está no array
+      },
+    });
+
+    if (!tutor) {
+      return res.status(404).json({ message: 'Tutor não encontrado para a disciplina especificada.' });
+    }
+
+    // Atualiza o array `disciplinaIDs` do tutor, removendo o ID da disciplina
+    const updatedDisciplinaIDs = tutor.disciplinaIDs.filter((disciplinaId) => disciplinaId !== id);
+
+    await prisma.tutor.update({
+      where: { id: tutor.id },
+      data: { disciplinaIDs: updatedDisciplinaIDs }, // Atualiza o array
+    });
+
+    // Exclui a disciplina
+    await prisma.disciplina.delete({
+      where: { id },
+    });
+
+    res.status(200).json({ message: 'Disciplina, turmas relacionadas e referências do tutor excluídas com sucesso!' });
+  } catch (error) {
+    console.error('Erro ao excluir disciplina:', error);
+    res.status(500).json({ message: 'Erro no servidor ao excluir a disciplina.' });
   }
 });
+
 // Criar uma nova turma (vincula tutor, aluno e disciplina)
 router.post('/turma', async (req, res) => {
   try {
@@ -485,7 +508,7 @@ router.get('/tutor/:tutorId/turmas-pendentes', async (req, res) => {
 
   try {
     const turmasPendentes = await prisma.turma.findMany({
-      where: { tutorId},
+      where: { tutorId, aprovado: false },
       //where: { tutorId, aprovado: false },
       include: {
         aluno: true, // Inclui detalhes do aluno
