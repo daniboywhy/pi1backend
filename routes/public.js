@@ -336,7 +336,7 @@ router.delete('/disciplina/:id', async (req, res) => {
 // Criar uma nova turma (vincula tutor, aluno e disciplina)
 router.post('/turma', async (req, res) => {
   try {
-    const { tutorId, alunoId, disciplinaId } = req.body;
+    const { tutorId, alunoId, disciplinaId, dataAula } = req.body;
 
     // Certifique-se de que todos os IDs foram recebidos corretamente
     if (!tutorId || !alunoId || !disciplinaId) {
@@ -355,6 +355,7 @@ router.post('/turma', async (req, res) => {
         disciplina: {
           connect: { id: disciplinaId },
         },
+        dataAula: dataAula
       },
     });
 
