@@ -319,6 +319,7 @@ router.post('/turma', async (req, res) => {
     if (!tutorId || !alunoId || !disciplinaId) {
       return res.status(400).json({ message: "IDs de tutor, aluno e disciplina são obrigatórios." });
     }
+    console.log(tutorId, alunoId, disciplinaId)
 
     const turma = await prisma.turma.create({
       data: {
@@ -386,6 +387,22 @@ router.put('/turma/:id', async (req, res) => {
   }
 });
 
+router.get('/turma/disciplina/:disciplinaId', async (req, res) => {
+  const { disciplinaId } = req.params;
+
+  try {
+    const turmas = await prisma.turma.findMany({
+      where: { disciplinaId },
+    });
+
+    res.status(200).json(turmas);
+  } catch (error) {
+    console.error("Erro ao buscar turmas relacionadas:", error);
+    res.status(500).json({ message: "Erro ao buscar turmas relacionadas." });
+  }
+});
+
+
 // Deletar uma turma
 router.delete('/turma/:id', async (req, res) => {
   try {
@@ -404,11 +421,7 @@ router.get("/tutordisciplinas", async (req, res) => {
   try {
     const tutordisciplinas = await prisma.tutor.findMany({
       include: {
-        disciplinas: {
-          select: {
-            nome: true // Seleciona apenas o nome da disciplina
-          }
-        }
+        disciplinas: true,
       }
     });
     res.status(200).json(tutordisciplinas);
@@ -425,20 +438,17 @@ router.get('/aluno/:alunoId/minhas-disciplinas', async (req, res) => {
     const turmas = await prisma.turma.findMany({
       where: { alunoId },
       include: {
-        disciplina: true, // Inclui as informações da disciplina
+        disciplina: true, // Inclui informações da disciplina
+        tutor: {
+          select: { nome: true }, // Inclui apenas o nome do tutor
+        },
       },
     });
 
-    // Mapeia as turmas para retornar tanto o turmaId quanto os detalhes da disciplina
-    const disciplinas = turmas.map(turma => ({
-      turmaId: turma.id, // Inclui o ID da turma
-      ...turma.disciplina // Inclui os detalhes da disciplina (nome, descrição, etc.)
-    }));
-
-    res.status(200).json(disciplinas);
+    res.status(200).json(turmas);
   } catch (error) {
-    console.error('Erro ao buscar disciplinas do aluno:', error);
-    res.status(500).json({ message: 'Erro ao buscar disciplinas do aluno' });
+    console.error('Erro ao buscar disciplinas vinculadas:', error);
+    res.status(500).json({ message: 'Erro ao buscar disciplinas vinculadas.' });
   }
 });
 
@@ -467,6 +477,7 @@ router.get('/tutor/:tutorId/disciplinas', async (req, res) => {
   }
 });
 
+
 // Listar turmas pendentes de aprovação
 router.get('/tutor/:tutorId/turmas-pendentes', async (req, res) => {
   const { tutorId } = req.params;
@@ -474,7 +485,8 @@ router.get('/tutor/:tutorId/turmas-pendentes', async (req, res) => {
 
   try {
     const turmasPendentes = await prisma.turma.findMany({
-      where: { tutorId: tutorId, aprovado: false },
+      where: { tutorId},
+      //where: { tutorId, aprovado: false },
       include: {
         aluno: true, // Inclui detalhes do aluno
         disciplina: true, // Inclui detalhes da disciplina
@@ -487,6 +499,24 @@ router.get('/tutor/:tutorId/turmas-pendentes', async (req, res) => {
     res.status(500).json({ message: "Erro ao buscar turmas pendentes." });
   }
 });
+
+// Aprovar turma
+router.put('/turma/:id/aprovar', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const turma = await prisma.turma.update({
+      where: { id },
+      data: { aprovado: true },
+    });
+
+    res.status(200).json(turma);
+  } catch (error) {
+    console.error("Erro ao aprovar turma:", error);
+    res.status(500).json({ message: "Erro ao aprovar turma." });
+  }
+});
+
 
 // Listar turmas aprovadas
 router.get('/tutor/:tutorId/turmas-aprovadas', async (req, res) => {
@@ -508,6 +538,29 @@ router.get('/tutor/:tutorId/turmas-aprovadas', async (req, res) => {
   }
 });
 
+// Atualizar avaliação da turma
+router.put('/turma/:turmaId/avaliacao', async (req, res) => {
+  const { turmaId } = req.params;
+  const { avaliacao } = req.body;
+
+  try {
+    // Verificar se a nota é válida
+    if (avaliacao < 1 || avaliacao > 5) {
+      return res.status(400).json({ message: 'A nota deve ser entre 1 e 5.' });
+    }
+
+    // Atualizar a avaliação no banco de dados
+    const turma = await prisma.turma.update({
+      where: { id: turmaId },
+      data: { avaliacao },
+    });
+
+    res.status(200).json(turma);
+  } catch (error) {
+    console.error('Erro ao atualizar avaliação:', error);
+    res.status(500).json({ message: 'Erro ao atualizar avaliação.' });
+  }
+});
 
 
 export default router;
