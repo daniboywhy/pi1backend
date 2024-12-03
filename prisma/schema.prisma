@@ -34,6 +34,7 @@ model Aluno {
   usuario     String          @unique
   senha       String
   turmas      Turma[]         // Relacionamento com Turma
+  statusPagamento String?          @default("pendente")
 }
 
 model Disciplina {

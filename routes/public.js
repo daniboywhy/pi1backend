@@ -2,11 +2,15 @@ import express from "express";
 import { PrismaClient } from '@prisma/client';
 // import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import Stripe from 'stripe';
 
 const prisma = new PrismaClient();
 const router = express.Router();
 
 const JWT_SECRET = process.env.JWT_SECRET;
+
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+const stripe = new Stripe(STRIPE_SECRET_KEY); // Corrigido para ESM
 
 
 //cadastros
@@ -585,6 +589,41 @@ router.put('/turma/:turmaId/avaliacao', async (req, res) => {
     res.status(500).json({ message: 'Erro ao atualizar avaliação.' });
   }
 });
+
+
+router.post('/checkout', async (req, res) => {
+    const { nome, email } = req.body;
+
+    try {
+        // Criar uma sessão de checkout no Stripe
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            mode: 'payment',
+            customer_email: email,
+            line_items: [
+                {
+                    price_data: {
+                        currency: 'brl',
+                        product_data: {
+                            name: `Pagamento para Aula`,
+                        },
+                        unit_amount: 1 * 100, 
+                    },
+                    quantity: 1,
+                },
+            ],
+            success_url: 'http://localhost:5173/profile/alunoturmas', // Redirecionar após sucesso
+            cancel_url: 'http://localhost:5173/profile/alunoturmas',  // Redirecionar se cancelado
+        });
+
+        res.json({ url: session.url });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Erro ao criar sessão de pagamento' });
+    }
+});
+
+//
 
 
 export default router;
